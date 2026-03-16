@@ -29,7 +29,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ Registro exitoso en PostgreSQL")),
+        const SnackBar(content: Text("✅ Registro exitoso")),
       );
       Navigator.pop(context);
     } else {

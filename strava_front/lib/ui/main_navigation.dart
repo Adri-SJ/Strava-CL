@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'feed_screen.dart';   // Foto 3: Feed/Usuario
-//import 'routes_screen.dart'; // Foto 4: Rutas
-import 'record_screen.dart'; // Foto 5: Grabar Ruta
-//import 'profile_screen.dart'; // Foto 6: Tu (Estadísticas)
+import 'feed_screen.dart';   // Feed/Usuario
+import 'routes_screen.dart'; // Rutas
+import 'record_screen.dart'; // Grabar Ruta
+import 'profile_screen.dart'; // Tu (Estadísticas)
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -17,9 +17,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   // Lista de las pantallas basadas en tus fotos
   final List<Widget> _screens = [
     const FeedScreen(),    // Pantalla de Usuario (Mockup 3)
-    //const RoutesScreen(),  // Pantalla de Rutas (Mockup 4)
+    const RoutesScreen(),  // Pantalla de Rutas (Mockup 4)
     const RecordScreen(),  // Pantalla de Grabar (Mockup 5)
-    //const ProfileScreen(), // Pantalla de Estadísticas (Mockup 6)
+    const ProfileScreen(), // Pantalla de Estadísticas (Mockup 6)
   ];
 
   @override
@@ -31,7 +31,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         onTap: (index) => setState(() => _selectedIndex = index),
         type: BottomNavigationBarType.fixed,
         backgroundColor: const Color(0xFF1F1F1F),
-        selectedItemColor: const Color(0xFFFC5200), // Naranja Strava
+        selectedItemColor: const Color(0xFFFC5200), 
         unselectedItemColor: Colors.white60,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: ''),
