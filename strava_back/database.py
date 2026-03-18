@@ -2,8 +2,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# RECUERDA: Cambia 'tu_password' por la de tu pgAdmin
-URL = "postgresql://postgres:1234@localhost:5432/strava_clone"
+
+URL = "postgresql://postgres:admin123@localhost:5432/strava_clone"
 
 engine = create_engine(URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -15,3 +15,4 @@ def get_db():
         yield db
     finally:
         db.close()
+

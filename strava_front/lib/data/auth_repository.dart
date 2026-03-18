@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/user_model.dart';
 
+/// Clase encargada de la comunicación con el backend (FastAPI) en Oracle Cloud.
+/// Centraliza todas las peticiones HTTP para autenticación y gestión de rutas.
 class AuthRepository {
+  // IP pública de la instancia de Oracle Cloud Infrastructure (OCI)
   final String _baseUrl = "http://159.54.147.165:8000";
 
-  // Registro de usuario
+  // Realiza el registro de nuevos usuarios enviando el modelo serializado a JSON
   Future<bool> registerUser(User user) async {
     try {
       final response = await http.post(
@@ -20,7 +23,7 @@ class AuthRepository {
     }
   }
 
-  // Login
+  // Validación de credenciales para el inicio de sesión
   Future<bool> login(String email, String password) async {
     try {
       final response = await http.post(
@@ -29,7 +32,7 @@ class AuthRepository {
         body: jsonEncode({
           "email": email,
           "password": password,
-          "username": "",
+          "username": "", // Campo requerido por el esquema del backend
         }),
       );
       return response.statusCode == 200;
@@ -39,15 +42,16 @@ class AuthRepository {
     }
   }
 
-  // Crear actividad inicial (Presionar Play)
-  Future<int?> crearActividad(String tipo) async {
+  // Inicializa una nueva actividad en el servidor y retorna su ID único
+  Future<int?> crearActividad(String tipo, int userId) async {
     try {
       final response = await http.post(
         Uri.parse("$_baseUrl/actividades/"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "tipo_deporte": tipo,
-          "distancia_total": 0.0
+          "distancia_total": 0.0,
+          "usuario_id": userId
         }),
       );
       if (response.statusCode == 200) {
@@ -60,7 +64,7 @@ class AuthRepository {
     }
   }
 
-  // Guardar punto GPS individual
+  // Envía una coordenada GPS individual para persistencia en tiempo real
   Future<void> enviarPuntoGPS(int actividadId, double lat, double lon, int orden) async {
     try {
       await http.post(
@@ -70,7 +74,7 @@ class AuthRepository {
           "actividad_id": actividadId,
           "latitud": lat,
           "longitud": lon,
-          "orden": orden
+          "orden": orden // Mantiene la secuencia lógica del trayecto
         }),
       );
     } catch (e) {
@@ -78,26 +82,36 @@ class AuthRepository {
     }
   }
 
-  // FINALIZAR ACTIVIDAD (Presionar Publicar)
-  Future<bool> finalizarActividad(int id, String nombre, String mensaje, double distancia) async {
+  // Actualiza los datos finales de la actividad y adjunta la evidencia fotográfica
+  // Utiliza MultipartRequest para permitir la subida de archivos binarios al servidor
+  Future<bool> finalizarActividad(int id, String nombre, String mensaje, double distancia, String? imagePath) async {
     try {
-      final response = await http.put(
-        Uri.parse("$_baseUrl/actividades/$id"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "titulo": nombre,
-          "descripcion": mensaje,
-          "distancia_km": distancia,
-        }),
+      var request = http.MultipartRequest(
+        'PUT', 
+        Uri.parse("$_baseUrl/actividades/$id")
       );
-      return response.statusCode == 200;
+
+      // Inserción de metadatos de la actividad como campos de formulario
+      request.fields['titulo'] = nombre;
+      request.fields['descripcion'] = mensaje;
+      request.fields['distancia_km'] = distancia.toString();
+
+      // Procesamiento y adjunto de la imagen desde el almacenamiento local
+      if (imagePath != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('foto', imagePath)
+        );
+      }
+
+      var streamedResponse = await request.send();
+      return streamedResponse.statusCode == 200;
     } catch (e) {
-      print("Error al finalizar: $e");
+      print("Error al finalizar actividad: $e");
       return false;
     }
   }
 
-  // Obtener Feed
+  // Recupera el listado global de actividades para el feed principal
   Future<List<dynamic>> obtenerFeed() async {
     try {
       final response = await http.get(Uri.parse("$_baseUrl/feed/"));
@@ -107,6 +121,29 @@ class AuthRepository {
       return [];
     } catch (e) {
       print("Error al obtener feed: $e");
+      return [];
+    }
+  }
+
+  // Filtra las actividades registradas específicamente por el usuario logueado
+  Future<List<dynamic>> obtenerMisActividades(int userId) async {
+    final response = await http.get(Uri.parse("$_baseUrl/usuarios/$userId/actividades"));
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+    return [];
+  }
+
+  // Consulta todas las rutas disponibles en la base de datos para la función de exploración
+  Future<List<dynamic>> obtenerTodasLasRutas() async {
+    try {
+      final response = await http.get(Uri.parse("$_baseUrl/explorar/rutas/"));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return [];
+    } catch (e) {
+      print("Error al explorar rutas: $e");
       return [];
     }
   }
