@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/user_model.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 /// Clase encargada de la comunicación con el backend (FastAPI) en Oracle Cloud.
 /// Centraliza todas las peticiones HTTP para autenticación y gestión de rutas.
@@ -147,4 +148,50 @@ class AuthRepository {
       return [];
     }
   }
+
+  // NUEVO MÉTODO: Obtiene las coordenadas para el Mapa de Calor de Seguridad
+  Future<List<LatLng>> obtenerPuntosSeguros() async {
+    try {
+      final response = await http.get(Uri.parse("$_baseUrl/seguridad/heatmap"));
+      if (response.statusCode == 200) {
+        List data = jsonDecode(response.body);
+        return data.map((p) => LatLng(p['lat'], p['lng'])).toList();
+      }
+      return [];
+    } catch (e) {
+      print("Error obteniendo heatmap: $e");
+      return [];
+    }
+  }
+
+  Future<bool> publicarAviso(int userId, String contenido, String categoria) async {
+  try {
+    final response = await http.post(
+      Uri.parse("$_baseUrl/avisos/"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "usuario_id": userId,
+        "contenido": contenido,
+        "categoria": categoria
+      }),
+    );
+    return response.statusCode == 200;
+  } catch (e) {
+    print("Error al publicar aviso: $e");
+    return false;
+  }
+}
+
+Future<List<dynamic>> obtenerAvisos() async {
+  try {
+    final response = await http.get(Uri.parse("$_baseUrl/avisos/"));
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+    return [];
+  } catch (e) {
+    print("Error al obtener avisos: $e");
+    return [];
+  }
+}
 }

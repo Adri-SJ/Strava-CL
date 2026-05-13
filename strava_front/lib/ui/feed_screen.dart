@@ -13,7 +13,7 @@ class _FeedScreenState extends State<FeedScreen> {
   final AuthRepository _authRepo = AuthRepository();
   
   // Credenciales y configuración de red para acceso a mapas y almacenamiento en OCI
-  final String _googleApiKey = ""; 
+  final String _googleApiKey = "AIzaSyDwUWglINWEDNnDPnZ0wzcWFCqmda7KhPE"; 
   final String _serverIp = "http://159.54.147.165:8000";
 
   /// Genera dinámicamente una URL para la Google Maps Static API.

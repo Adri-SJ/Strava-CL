@@ -3,11 +3,10 @@ import 'feed_screen.dart';
 import 'routes_screen.dart'; 
 import 'record_screen.dart'; 
 import 'profile_screen.dart'; 
+import 'AvisosScreen.dart';
 
-/// Pantalla contenedora que gestiona la navegación principal de la aplicación.
-/// Utiliza un BottomNavigationBar para alternar entre los diferentes módulos funcionales.
 class MainNavigationScreen extends StatefulWidget {
-  final int userId; // Identificador único del usuario obtenido tras el login
+  final int userId; 
   const MainNavigationScreen({super.key, required this.userId});
 
   @override
@@ -15,39 +14,72 @@ class MainNavigationScreen extends StatefulWidget {
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  // Índice para controlar la pantalla activa en el Stack de navegación
   int _selectedIndex = 0;
-
-  // Lista de widgets que representan las secciones principales de la app
   late final List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
-    // Inicialización de pantallas inyectando el userId donde se requiere 
-    // persistencia o filtrado de datos específicos del usuario.
     _screens = [
-      const FeedScreen(),            // Módulo de comunidad global
-      const RoutesScreen(),          // Exploración de rutas en el mapa
-      RecordScreen(userId: widget.userId), // Módulo de grabación de actividad
-      ProfileScreen(userId: widget.userId), // Panel de estadísticas personales
+      const FeedScreen(),            
+      const RoutesScreen(),          
+      RecordScreen(userId: widget.userId), 
+      ProfileScreen(userId: widget.userId), 
     ];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Renderizado dinámico de la pantalla según el índice seleccionado
       body: _screens[_selectedIndex],
+    
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: Stack(
+        alignment: Alignment.topRight,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              // Navegación directa al Tablero de Avisos
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AvisosScreen(userId: widget.userId)),
+              );
+            },
+            backgroundColor: const Color(0xFF4CAF50), // Verde para resaltar del naranja del menú
+            elevation: 8,
+            child: const Icon(Icons.campaign, size: 32, color: Colors.white),
+          ),
+          
+          // Badge de notificación (el circulito rojo con el número)
+          Positioned(
+            right: 0,
+            top: 0,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+              ),
+              constraints: const BoxConstraints(minWidth: 22, minHeight: 22),
+              child: const Text(
+                '1',
+                style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ],
+      ),
+
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        // Actualización del estado para refrescar la interfaz al cambiar de pestaña
         onTap: (index) => setState(() => _selectedIndex = index),
-        type: BottomNavigationBarType.fixed, // Mantiene los iconos fijos sin animaciones de desplazamiento
+        type: BottomNavigationBarType.fixed,
         backgroundColor: const Color(0xFF1F1F1F),
-        selectedItemColor: const Color(0xFFFC5200), // Color naranja corporativo (Strava style)
+        selectedItemColor: const Color(0xFFFC5200), 
         unselectedItemColor: Colors.white60,
-        showSelectedLabels: false, // Estética limpia sin etiquetas de texto
+        showSelectedLabels: false,
         showUnselectedLabels: false,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Inicio'),

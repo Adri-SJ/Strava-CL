@@ -96,7 +96,7 @@ class ActivityDetailScreen extends StatelessWidget {
       path += "|${p['latitud']},${p['longitud']}";
     }
     
-    return "https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=dark&path=$path&key=";
+    return "https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=dark&path=$path&key=AIzaSyDwUWglINWEDNnDPnZ0wzcWFCqmda7KhPE";
   }
 
   /// Helper para construir widgets de estadísticas con formato uniforme
